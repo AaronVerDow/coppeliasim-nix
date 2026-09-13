@@ -17,6 +17,7 @@
         
         extraLibs = [
 	  libsodium1018
+	  pkgs.snappy
         ];
 
         # 2. Create a custom steam-run that includes your extra libraries
