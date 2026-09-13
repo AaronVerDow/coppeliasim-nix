@@ -18,6 +18,11 @@
         extraLibs = [
 	  libsodium1018
 	  pkgs.snappy
+	  pkgs.python314Packages.pyzmq
+	  pkgs.python314Packages.cbor2
+	  # doesn't work currently
+	  # needs libgsm.so.1 instead of libgsm.so
+          pkgs.gsm
         ];
 
         # 2. Create a custom steam-run that includes your extra libraries
@@ -36,7 +41,9 @@
           '';
 
           # Expose your customized steam-run directly in the shell path
-          packages = [ customSteamRun ];
+          packages = [ 
+	    customSteamRun
+	  ];
         };
 
         # Optional: Allows you to run it directly via 'nix run'
