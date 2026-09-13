@@ -21,7 +21,7 @@
 
         # 2. Create a custom steam-run that includes your extra libraries
         customSteamRun = pkgs.steam-run.override {
-          extraLibraries = pkgs: extraLibs;
+          extraLibraries = extraLibs;
         };
       in
       {
