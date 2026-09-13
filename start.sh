@@ -1,0 +1,1 @@
+steam-run ./CoppeliaSim_Edu_V4_10_0_rev0_Ubuntu24_04/coppeliaSim
