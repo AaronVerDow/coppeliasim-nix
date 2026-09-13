@@ -20,9 +20,9 @@
         ];
 
         # 2. Create a custom steam-run that includes your extra libraries
-        customSteamRun = pkgs.steam-run.override {
-          extraLibraries = extraLibs;
-        };
+	customSteamRun = (pkgs.steam.override {
+          extraLibraries = pkgs: extraLibs;
+        }).run;
       in
       {
         # Allows you to drop into a shell with 'nix develop'
