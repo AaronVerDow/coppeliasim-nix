@@ -1,48 +1,44 @@
 {
-  description = "steam-run with libsodium 1.0.18";
+  description = "An isolated Steam-run environment with custom libraries";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs }:
-    let
-      lib = nixpkgs.lib;
-      # The Steam client only ships for x86_64-linux
-      systems = [ "x86_64-linux" ];
-    in
-    {
-      packages = lib.genAttrs systems (system:
-        let
-          pkgs = import nixpkgs {
-            inherit system;
-            config.allowUnfree = true;
-          };
+  outputs = { self, nixpkgs, utils }:
+    utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+	libsodium1018 = pkgs.callPackage ./pkgs/libsodium { };
+        
+        extraLibs = [
+	  libsodium1018
+        ];
 
-          libsodium1018 = pkgs.callPackage ./pkgs/libsodium { };
+        # 2. Create a custom steam-run that includes your extra libraries
+        customSteamRun = pkgs.steam-run.override {
+          extraLibraries = pkgs: extraLibs;
+        };
+      in
+      {
+        # Allows you to drop into a shell with 'nix develop'
+        devShells.default = pkgs.mkShell {
+          buildInputs = extraLibs; # Available for building from source
 
-          steamRun = pkgs.stdenvNoCC.mkDerivation {
-            pname = "steam-run";
-            version = pkgs.steam.version;
-            nativeBuildInputs = [ pkgs.makeWrapper ];
-            dontUnpack = true;
-            dontBuild = true;
-            installPhase = ''
-              runHook preInstall
-              mkdir -p $out/bin
-              makeWrapper ${pkgs.steam}/bin/steam-run $out/bin/steam-run \
-                --prefix LD_LIBRARY_PATH : ${libsodium1018}/lib
-            '';
-            meta = {
-              description = "steam-run with libsodium 1.0.18 in LD_LIBRARY_PATH";
-              license = lib.licenses.unfreeRedistributableFoss;
-              platforms = [ "x86_64-linux" ];
-            };
-          };
-        in
-        {
-          default = steamRun;
-          inherit libsodium1018 steamRun;
-        });
-    };
+          shellHook = ''
+            echo "Steam-run environment loaded!"
+            echo "Use 'steam-run ./your-compiled-binary' to execute."
+          '';
+
+          # Expose your customized steam-run directly in the shell path
+          packages = [ customSteamRun ];
+        };
+
+        # Optional: Allows you to run it directly via 'nix run'
+        apps.default = {
+          type = "app";
+          program = "${customSteamRun}/bin/steam-run";
+        };
+      });
 }
