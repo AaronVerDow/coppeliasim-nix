@@ -1,5 +1,16 @@
 # CoppeliaSim Nix
 
-Trying to make a flake for this.
+Nix flake to run CoppeliaSim
 
-Download the latest Ubuntu version to repo root and extract.
+This uses `steam-run` to create the appropriate environment, and adds in some additional libraries.
+
+Download the Ubuntu 24.04 version to repo root, extract it, then run:
+
+```
+nix develop
+./start.sh
+```
+
+Alternatively, enable `direnv` for to load the dev environment automatically.
+
+There are still some warnings, but so far this is working.
